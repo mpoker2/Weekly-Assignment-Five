@@ -83,10 +83,55 @@ Once your repository is created, you should always open your **project** rather 
 
   1. Choose 2 graphs you have created for ANY assignment in this class and add interactivity using the `ggplotly()` function.
   
+```{r}
+vegetable_daily_harvests <- garden_harvest %>% 
+  mutate(weight_in_lbs = weight*0.00220462) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  geom_boxplot(aes(y = weight_in_lbs,
+                   x = vegetable))+
+  labs(x = "Vegetable",
+       y = "Weight (lbs)")+
+  ggtitle(label = "Daily Harvest for Each Vegetable")
+ggplotly(vegetable_daily_harvests)
+```
+  
+```{r}
+garden_harvest_graph <- garden_harvest %>%
+  filter(vegetable %in% c("cucumbers", "beans", "zucchini"), date < mdy("10/1/2020")) %>%
+  select(vegetable, weight, date) %>%
+  group_by(vegetable, date) %>%
+  mutate(weight_lb = weight*0.0022) %>% 
+  summarise(total_weight = sum(weight_lb)) %>% 
+  ggplot(aes(x = date, y = total_weight, color = vegetable, shape = vegetable))+
+  geom_point()+
+  geom_line()+
+  labs(title = "Growth in Weight (lb) of Vegetables",
+       x = "",
+       y = "")+
+  scale_y_continuous(n.breaks = 10)+
+  scale_colour_viridis_d()+
+  theme_minimal()+
+  theme(legend.position="top",
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank())
+ggplotly(garden_harvest_graph)
+```
+  
+  
   2. Use animation to tell an interesting story with the `small_trains` dataset that contains data from the SNCF (National Society of French Railways). These are Tidy Tuesday data! Read more about it [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-02-26).
 
 ```{r}
-
+train_anim <- small_trains %>%
+  mutate(month = factor(month.abb[month], levels = month.abb)) %>% 
+  ggplot(aes(x = month, y = num_arriving_late)) +
+  geom_col() +
+  transition_states(year)+
+  labs(title = "Number of Late Arriving Trains by Month", 
+       subtitle = "Year: {next_state}",
+       x = "",
+       y = "")
+anim_save("train.gif", train_anim)
 ```
 
 ## Garden data
